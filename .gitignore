@@ -32,3 +32,6 @@ pnpm-debug.log*
 
 # workbuddy project data (memory, caches)
 .workbuddy-ai/
+
+# penanda app WorkBuddy (dibuat saat deploy)
+*.genie
