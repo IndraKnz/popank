@@ -1,0 +1,15 @@
+# Blueprint Render — satu klik "Apply" untuk relay multiplayer.
+# Situs tetap di Netlify; Render hanya menjalankan server/relay.js.
+# Setelah deploy, salin URL-nya ke Netlify sebagai
+#   VITE_ROOM_WS = wss://<nama-service>.onrender.com/room
+services:
+  - type: web
+    name: popank-relay
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: MAX_PER_ROOM
+        value: "16"
