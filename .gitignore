@@ -35,3 +35,6 @@ pnpm-debug.log*
 
 # penanda app WorkBuddy (dibuat saat deploy)
 *.genie
+
+# data tooling WorkBuddy
+.workbuddy/
