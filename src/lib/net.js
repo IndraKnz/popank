@@ -3,11 +3,11 @@
  *
  * Strategi:
  *  1. BroadcastChannel  → sinkron instan antar-tab di browser yang sama.
- *  2. WebSocket         → room online lintas perangkat. Build produksi memakai
- *                         origin yang sama (`/room`), karena `npm start`
- *                         menyajikan situs + relay dari satu proses.
- *                         Saat `npm run dev`, isi VITE_ROOM_WS (mis.
- *                         ws://localhost:8080/room) untuk ikut online.
+ *  2. WebSocket         → room online lintas perangkat. Alamatnya dicari saat
+ *                         connect(): VITE_ROOM_WS kalau diisi, atau origin
+ *                         sendiri bila `/health` menjawab (artinya situs
+ *                         disajikan `server/relay.js`). Di hosting statis
+ *                         murni (Netlify/GitHub Pages) kanal ini dilewati.
  *
  * Pesan: { t:'s', id, n:name, a:avatar, p:[x,y,z], r:rotY, an:anim, ts }
  * Pesan foto: { t:'ph', id, ph:[dataUrl,...] }  (dikirim sekali, bukan 10×/detik)
@@ -17,22 +17,6 @@
 const SEND_HZ = 10
 const TTL = 4000
 const MAX_RETRY = 5
-
-/**
- * Alamat relay WebSocket.
- *  - VITE_ROOM_WS menang kalau diisi (mis. saat `npm run dev`).
- *  - Build produksi memakai origin yang sama (`/room`), karena `npm start`
- *    menyajikan situs dan relay dari satu proses.
- *  - Saat dev tanpa VITE_ROOM_WS, cukup BroadcastChannel.
- */
-function resolveWsUrl() {
-  const explicit = import.meta.env.VITE_ROOM_WS
-  if (explicit) return explicit
-  if (import.meta.env.DEV) return ''
-  if (typeof window === 'undefined') return ''
-  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${proto}//${window.location.host}/room`
-}
 
 class RoomNet {
   constructor() {
@@ -68,8 +52,8 @@ class RoomNet {
       this.channel.onmessage = (e) => this.#onMessage(e.data)
     }
 
-    this.wsUrl = resolveWsUrl()
-    if (this.wsUrl) this.#openSocket()
+    this.wsUrl = ''
+    this.#probeRelay()
 
     this.sendTimer = setInterval(() => {
       if (this.lastState) this.#broadcast(this.lastState)
@@ -79,6 +63,35 @@ class RoomNet {
 
     // kirim foto poster ke peserta lain setelah kanal siap
     setTimeout(() => this.sendPhotos(), 400)
+  }
+
+  /**
+   * Cari relay sebelum menyambung.
+   *  - VITE_ROOM_WS eksplisit → pakai itu (mis. relay terpisah dari situs,
+   *    seperti situs di Netlify + relay di Render).
+   *  - Selain itu, cek `/health` di origin sendiri: kalau ada, berarti situs
+   *    ini disajikan `server/relay.js` dan WebSocket tersedia di /room.
+   *  - Kalau tidak ada (hosting statis murni seperti Netlify/GitHub Pages),
+   *    jangan mencoba sama sekali — cukup BroadcastChannel, tanpa spam error.
+   */
+  async #probeRelay() {
+    const explicit = import.meta.env.VITE_ROOM_WS
+    if (explicit) {
+      this.wsUrl = explicit
+      this.#openSocket()
+      return
+    }
+    if (import.meta.env.DEV || typeof window === 'undefined') return
+    try {
+      const res = await fetch('/health', { cache: 'no-store' })
+      const data = res.ok ? await res.json().catch(() => null) : null
+      if (!this.enabled || !data?.ok) return
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      this.wsUrl = `${proto}//${window.location.host}/room`
+      this.#openSocket()
+    } catch {
+      /* hosting statis tanpa relay → mode lokal */
+    }
   }
 
   #openSocket() {

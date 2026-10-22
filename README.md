@@ -232,17 +232,29 @@ Situs statis saja tidak cukup — relay butuh proses yang hidup. Satu container
 sudah memuat keduanya:
 
 ```bash
-docker build -t ever-tide .
-docker run -p 8080:8080 ever-tide
+docker build -t popank .
+docker run -p 8080:8080 popank
 ```
 
 Di Render / Railway / Fly.io: hubungkan repo, pilih **Dockerfile**, selesai —
 `PORT` diisi otomatis oleh platform. Setelah itu buka tautan undangan dari
 perangkat mana pun, dan keduanya masuk pulau yang sama.
 
-> GitHub Pages **tidak bisa** dipakai untuk relay (statis). Kalau situs tetap
-> di-host di Pages, jalankan relay di tempat lain lalu set
-> `VITE_ROOM_WS=wss://relay-kamu/room` saat build — lihat `.env.example`.
+**Netlify (situs saja).** `netlify.toml` sudah disiapkan: build `npm run build`,
+publish `dist`, Node 22. Impor repo lewat *Add new site → Import an existing
+project*, dan Netlify langsung memakai konfigurasi itu. Situs jalan penuh —
+tapi **relay tidak bisa ikut**, karena Netlify Functions bersifat
+request/response dengan batas waktu, bukan koneksi yang bertahan. Di sana panel
+Bagikan akan menampilkan "Mode lokal" (multiplayer hanya antar-tab). Untuk
+online, jalankan relay di tempat lain lalu isi environment variable
+`VITE_ROOM_WS=wss://relay-kamu/room` di Netlify, dan deploy ulang.
+
+Klien mencari relay sendiri: kalau `VITE_ROOM_WS` kosong, ia mengecek `/health`
+di origin yang sama — ada balasan `{ok:true}` berarti relay tersedia, kalau
+tidak (hosting statis) kanal WebSocket dilewati tanpa percobaan yang gagal
+berulang.
+
+> GitHub Pages juga statis — perlakuan sama seperti Netlify.
 
 **Foto poster.** Host mengirim `ph` sekali setelah terhubung dan sekali lagi
 setiap ada peserta baru — jadi pasangan yang bergabung belakangan tetap
