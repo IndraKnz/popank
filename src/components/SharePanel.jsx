@@ -13,10 +13,18 @@ export default function SharePanel() {
   const showToast = useStore((s) => s.showToast)
   const [peers, setPeers] = useState([])
   const [copied, setCopied] = useState(false)
+  const [online, setOnline] = useState(false)
 
   useEffect(() => {
     if (!open) return
-    return net.subscribe(setPeers)
+    const unsub = net.subscribe(setPeers)
+    // status kanal bisa berubah (putus → sambung ulang), pantau ringan
+    const poll = setInterval(() => setOnline(net.online), 800)
+    setOnline(net.online)
+    return () => {
+      unsub()
+      clearInterval(poll)
+    }
   }, [open])
 
   const link = useMemo(
@@ -123,15 +131,31 @@ export default function SharePanel() {
             </ul>
           )}
 
-          <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-lagoon-400/20 bg-lagoon-500/10 px-3.5 py-3">
-            <Radio className="mt-0.5 h-3.5 w-3.5 shrink-0 text-lagoon-300" />
+          <div
+            className={`mt-5 flex items-start gap-2.5 rounded-2xl border px-3.5 py-3 ${
+              online
+                ? 'border-emerald-400/25 bg-emerald-500/10'
+                : 'border-lagoon-400/20 bg-lagoon-500/10'
+            }`}
+          >
+            <Radio
+              className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${
+                online ? 'text-emerald-300' : 'text-lagoon-300'
+              }`}
+            />
             <p className="text-[11px] leading-relaxed text-sand-100/55">
-              Kehadiran realtime berjalan lewat <b className="text-sand-100/75">BroadcastChannel</b>{' '}
-              (antar-tab di perangkat yang sama). Untuk room online lintas perangkat, isi{' '}
-              <code className="rounded bg-black/30 px-1 py-0.5 text-[10.5px] text-amber-200/80">
-                VITE_ROOM_WS
-              </code>{' '}
-              dengan alamat WebSocket-mu.
+              {online ? (
+                <>
+                  Terhubung ke <b className="text-sand-100/75">server online</b> — siapa pun yang
+                  membuka tautan ini akan masuk ke pulau yang sama, dari perangkat mana pun.
+                </>
+              ) : (
+                <>
+                  Mode <b className="text-sand-100/75">lokal</b>: kehadiran hanya tersinkron antar-tab
+                  di perangkat ini. Jalankan <code className="rounded bg-black/30 px-1 py-0.5 text-[10.5px] text-amber-200/80">npm start</code>{' '}
+                  lalu buka situs dari alamat server agar bisa lintas perangkat.
+                </>
+              )}
             </p>
           </div>
 

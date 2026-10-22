@@ -18,6 +18,7 @@ tekstur, atau audio yang diunduh**.
 ![Duduk di ayunan](preview/swing.png)
 ![Pesawat & banner](preview/plane.png)
 ![Hati di langit](preview/heart.png)
+![Dua pemain dari perangkat berbeda](preview/multiplayer.png)
 
 ---
 
@@ -25,12 +26,16 @@ tekstur, atau audio yang diunduh**.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:5173 (hot reload, multiplayer lokal)
 npm run build    # hasil produksi di dist/
-npm run preview  # pratinjau hasil build
+npm start        # http://localhost:8080 — situs + relay multiplayer online
+npm run preview  # pratinjau hasil build (tanpa relay)
 ```
 
-Butuh Node 18+.
+Butuh Node 18+. `npm start` menjalankan `server/relay.js`, yang menyajikan
+`dist/` sekaligus menjadi relay WebSocket — inilah cara main lintas perangkat.
+Saat `npm run dev`, isi `VITE_ROOM_WS` (lihat `.env.example`) kalau ingin ikut
+online juga.
 
 ---
 
@@ -182,27 +187,62 @@ otomatis di-*suspend* saat tab tidak aktif.
 
 ---
 
-## Multi-pemain
+## Multi-pemain (online lintas perangkat)
 
-Kehadiran pemain lain ditangani `src/lib/net.js`:
+Kehadiran pemain lain ditangani `src/lib/net.js`, dengan dua kanal yang aktif
+bersamaan:
 
-- **Default — BroadcastChannel.** Satu kode ruang, tanpa server. Pemain lain
-  terlihat bila membuka tautan undangan di **perangkat/browser yang sama**
-  (mis. dua tab). Cocok untuk demo.
-- **Lintas perangkat — WebSocket.** Setel `VITE_ROOM_WS` ke URL WebSocket-mu
-  untuk sinkronisasi antar perangkat:
+- **WebSocket — online lintas perangkat.** `server/relay.js` menyajikan hasil
+  build **dan** menjadi relay di `/room?room=KODE`. Karena satu origin, build
+  produksi otomatis tersambung tanpa konfigurasi apa pun:
 
   ```bash
-  # .env.local
-  VITE_ROOM_WS=wss://contoh-server-kamu/room
+  npm run build
+  npm start          # http://localhost:8080 — situs + relay
   ```
 
-  Server hanya perlu meneruskan pesan JSON ke semua klien di ruang yang sama.
-  Pesan yang dikirim: `{ t:'hello'|'state'|'bye', id, name, avatar, p:[x,y,z], r, an }`,
-  plus `{ t:'ph', id, ph:[dataUrl,…] }` untuk delapan foto poster (dikirim sekali
-  saat bergabung, bukan 10×/detik).
+  Buka alamat itu dari HP dan laptop (satu jaringan), atau deploy dulu agar
+  bisa dari mana saja (lihat di bawah).
+- **BroadcastChannel — lokal.** Tetap aktif sebagai jalur cadangan: dua tab di
+  browser yang sama langsung saling melihat tanpa server. Berguna saat
+  `npm run dev`.
 
-Posisi disinkronkan 10×/detik; pemain yang diam > 4 detik dihapus otomatis.
+Status kanal terlihat di panel **Bagikan**: "Terhubung ke server online" (hijau)
+atau "Mode lokal" (biru). Kalau koneksi putus, klien menyambung ulang otomatis
+dengan backoff 1→2→4→8→15 detik (berhenti setelah 5 percobaan).
+
+### Protokol
+
+Server hanya meneruskan JSON ke semua klien lain di ruang yang sama — tanpa
+menyimpan apa pun:
+
+| Pesan | Isi |
+| --- | --- |
+| `{ t:'s', id, n, a, p:[x,y,z], r, an }` | posisi & animasi, 10×/detik |
+| `{ t:'ph', id, ph:[dataUrl,…] }` | delapan foto poster, sekali saat bergabung |
+| `{ t:'bye', id }` | keluar |
+
+Posisi disinkronkan 10×/detik; pemain yang diam > 4 detik dihapus otomatis, dan
+relay membuang koneksi mati lewat ping/pong 30 detik. Batas 16 pemain per ruang
+(`MAX_PER_ROOM`) dan pesan maksimal 8 MB (cukup untuk 8 foto poster).
+
+### Deploy supaya bisa main jarak jauh
+
+Situs statis saja tidak cukup — relay butuh proses yang hidup. Satu container
+sudah memuat keduanya:
+
+```bash
+docker build -t ever-tide .
+docker run -p 8080:8080 ever-tide
+```
+
+Di Render / Railway / Fly.io: hubungkan repo, pilih **Dockerfile**, selesai —
+`PORT` diisi otomatis oleh platform. Setelah itu buka tautan undangan dari
+perangkat mana pun, dan keduanya masuk pulau yang sama.
+
+> GitHub Pages **tidak bisa** dipakai untuk relay (statis). Kalau situs tetap
+> di-host di Pages, jalankan relay di tempat lain lalu set
+> `VITE_ROOM_WS=wss://relay-kamu/room` saat build — lihat `.env.example`.
 
 **Foto poster.** Host mengirim `ph` sekali setelah terhubung dan sekali lagi
 setiap ada peserta baru — jadi pasangan yang bergabung belakangan tetap
@@ -232,6 +272,8 @@ Contoh: `https://situsmu.com/#/w/eyJ2IjoxLCJwIjp7...`
 ## Struktur proyek
 
 ```
+server/
+└─ relay.js                # HTTP statis (dist/) + relay WebSocket /room
 src/
 ├─ App.jsx                 # Canvas R3F + orkestrasi overlay UI
 ├─ index.css               # design token Tailwind v4 + komponen (.btn, .glass, .slider, …)

@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.gitignore
+.workbuddy-ai
+preview
+.vscode
+*.log
+Dockerfile
