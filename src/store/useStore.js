@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { DEFAULT_AVATAR, DEFAULT_PROFILE, DEFAULT_SETTINGS } from '../lib/content'
 
 /**
- * Store global Ever Tide.
+ * Store global POPANK.
  * - phase      : 'intro' | 'customize' | 'world'
  * - settings   : dipersist ke localStorage
  * - avatar     : dipersist (biar tidak perlu atur ulang)

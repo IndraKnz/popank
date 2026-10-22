@@ -1,5 +1,5 @@
 /**
- * Mesin audio prosedural Ever Tide.
+ * Mesin audio prosedural POPANK.
  * Tidak ada file mp3 sama sekali — semua suara dibangkitkan dengan Web Audio API:
  *  - "ambience" : ombak pantai (noise + filter yang bergerak pelan)
  *  - "music"    : pad hangat + arpeggio piano-ish dengan progresi romantis

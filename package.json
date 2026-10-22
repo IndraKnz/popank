@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Ever Tide - interactive 3D tropical sunset birthday experience",
+  "description": "POPANK - interactive 3D tropical sunset birthday experience",
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",

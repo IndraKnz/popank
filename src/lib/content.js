@@ -1,5 +1,5 @@
 /**
- * Konten & preset desain untuk Ever Tide.
+ * Konten & preset desain untuk POPANK.
  * Semua teks yang bisa dipersonalisasi ada di sini agar mudah diubah.
  */
 

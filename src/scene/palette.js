@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 /**
- * Konstanta dunia Ever Tide.
+ * Konstanta dunia POPANK.
  * Arah matahari: rendah di atas laut, sedikit ke kanan (-Z adalah arah dermaga).
  */
 export const SUN_DIR = new THREE.Vector3(0.34, 0.085, -1).normalize()

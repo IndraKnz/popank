@@ -53,7 +53,7 @@ function Logo() {
         />
       </svg>
       <div className="leading-none">
-        <div className="display text-[17px] tracking-wide text-sand-50">Ever Tide</div>
+        <div className="display text-[17px] tracking-wide text-sand-50">POPANK</div>
         <div className="mt-0.5 text-[8.5px] font-semibold tracking-[0.3em] text-sand-100/40 uppercase">
           Senja yang tinggal
         </div>

@@ -1,5 +1,5 @@
 /**
- * Lapisan kehadiran (presence) sederhana untuk Ever Tide.
+ * Lapisan kehadiran (presence) sederhana untuk POPANK.
  *
  * Strategi:
  *  1. BroadcastChannel  → sinkron instan antar-tab di browser yang sama.
