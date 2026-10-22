@@ -1,0 +1,373 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Great+Vibes&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+/* ============================================================
+   EVER TIDE — Design tokens
+   Palet: senja tropis (indigo lembayung → koral → amber),
+   pasir krem, dan laguna teal. UI kaca gelap yang hangat.
+   ============================================================ */
+@theme {
+  --color-ink-950: #06070f;
+  --color-ink-900: #080a14;
+  --color-ink-800: #0b0e1a;
+  --color-ink-700: #121627;
+  --color-ink-600: #1b2036;
+
+  --color-sand-50: #fffaf2;
+  --color-sand-100: #fdeedb;
+  --color-sand-200: #f6dcc0;
+  --color-sand-300: #e8c39c;
+
+  --color-coral-300: #ffb59c;
+  --color-coral-400: #ff8a6b;
+  --color-coral-500: #f9705a;
+  --color-coral-600: #e2543f;
+
+  --color-rose-400: #ff6b8a;
+  --color-rose-500: #ef4d72;
+
+  --color-amber-200: #ffe6b8;
+  --color-amber-300: #ffc77a;
+  --color-amber-400: #f7a94e;
+
+  --color-lagoon-300: #7cc4c9;
+  --color-lagoon-400: #4fa3ae;
+  --color-lagoon-500: #2e7d8f;
+  --color-lagoon-700: #17505e;
+
+  --font-display: 'Cormorant Infant', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-script: 'Great Vibes', 'Segoe Script', cursive;
+
+  --radius-4xl: 2rem;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--color-ink-900);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-sand-50);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  canvas {
+    display: block;
+    touch-action: none;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-coral-400) 45%, transparent);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber-300);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Scrollbar halus untuk panel */
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+  .scroll-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+  }
+}
+
+@layer components {
+  /* ---------- Permukaan kaca ---------- */
+  .glass {
+    background: linear-gradient(
+      155deg,
+      rgba(255, 246, 235, 0.11) 0%,
+      rgba(255, 246, 235, 0.05) 42%,
+      rgba(11, 14, 26, 0.42) 100%
+    );
+    border: 1px solid rgba(255, 226, 200, 0.16);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
+      0 24px 60px -24px rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+  }
+
+  .glass-soft {
+    background: rgba(11, 14, 26, 0.42);
+    border: 1px solid rgba(255, 226, 200, 0.12);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+  }
+
+  /* Panel dialog dengan teks panjang: jauh lebih pekat supaya terbaca. */
+  .panel {
+    background: linear-gradient(
+      160deg,
+      rgba(24, 28, 46, 0.95) 0%,
+      rgba(11, 14, 26, 0.975) 100%
+    );
+    border: 1px solid rgba(255, 226, 200, 0.14);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.08) inset,
+      0 30px 70px -30px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(26px) saturate(140%);
+    -webkit-backdrop-filter: blur(26px) saturate(140%);
+  }
+
+  /* ---------- Tombol ---------- */
+  .btn,
+  .btn-primary,
+  .btn-ghost {
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold tracking-wide transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-primary {
+    @apply text-ink-900;
+    background: linear-gradient(135deg, #ffd7a3 0%, #ff9d7d 46%, #ff7597 100%);
+    box-shadow:
+      0 10px 30px -10px rgba(255, 130, 110, 0.85),
+      0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow:
+      0 16px 38px -12px rgba(255, 130, 110, 0.95),
+      0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0) scale(0.985);
+  }
+
+  .btn-ghost {
+    @apply text-sand-100;
+    background: rgba(255, 246, 235, 0.07);
+    border: 1px solid rgba(255, 226, 200, 0.18);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: rgba(255, 246, 235, 0.13);
+    border-color: rgba(255, 226, 200, 0.3);
+  }
+
+  /* Tombol ikon bulat di HUD */
+  .icon-btn {
+    @apply grid h-11 w-11 cursor-pointer place-items-center rounded-full text-sand-100 transition-all duration-200;
+    background: rgba(11, 14, 26, 0.42);
+    border: 1px solid rgba(255, 226, 200, 0.16);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+  }
+  .icon-btn:hover {
+    background: rgba(255, 246, 235, 0.14);
+    border-color: rgba(255, 226, 200, 0.32);
+    transform: translateY(-1px);
+  }
+  .icon-btn:active {
+    transform: scale(0.94);
+  }
+
+  /* ---------- Tipografi ---------- */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-300/85;
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 0.98;
+  }
+
+  .script {
+    font-family: var(--font-script);
+    line-height: 1.35;
+  }
+
+  /* ---------- Kontrol form ---------- */
+  .field {
+    @apply w-full rounded-2xl px-4 py-3 text-[15px] text-sand-50 transition-colors duration-200 outline-none;
+    background: rgba(6, 7, 15, 0.45);
+    border: 1px solid rgba(255, 226, 200, 0.16);
+  }
+  .field::placeholder {
+    color: rgba(253, 238, 219, 0.34);
+  }
+  .field:focus {
+    border-color: rgba(255, 199, 122, 0.7);
+    background: rgba(6, 7, 15, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 199, 122, 0.13);
+  }
+
+  .seg {
+    @apply flex gap-1 rounded-full p-1;
+    background: rgba(6, 7, 15, 0.5);
+    border: 1px solid rgba(255, 226, 200, 0.13);
+  }
+  .seg-item {
+    @apply flex-1 cursor-pointer rounded-full px-3 py-2 text-xs font-semibold tracking-wide transition-all duration-200;
+    color: rgba(253, 238, 219, 0.62);
+  }
+  .seg-item:hover {
+    color: var(--color-sand-50);
+    background: rgba(255, 246, 235, 0.06);
+  }
+  .seg-item[data-active='true'] {
+    color: var(--color-ink-900);
+    background: linear-gradient(135deg, #ffd7a3, #ff9d7d);
+    box-shadow: 0 6px 18px -8px rgba(255, 150, 120, 0.9);
+  }
+
+  /* Slider */
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      var(--color-amber-300) 0%,
+      var(--color-coral-400) var(--fill, 50%),
+      rgba(255, 255, 255, 0.14) var(--fill, 50%),
+      rgba(255, 255, 255, 0.14) 100%
+    );
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #fff7ec;
+    border: 2px solid var(--color-coral-400);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease;
+  }
+  .slider:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+  .slider::-moz-range-track {
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+  .slider::-moz-range-progress {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-amber-300), var(--color-coral-400));
+  }
+  .slider::-moz-range-thumb {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #fff7ec;
+    border: 2px solid var(--color-coral-400);
+  }
+}
+
+/* ============================================================
+   Animasi
+   ============================================================ */
+@keyframes et-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes et-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes et-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes et-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+@keyframes et-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.anim-rise {
+  animation: et-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-fade {
+  animation: et-fade 0.5s ease both;
+}
+.anim-float {
+  animation: et-float 6s ease-in-out infinite;
+}
+.anim-glow {
+  animation: et-glow 4.5s ease-in-out infinite;
+}
+
+/* Gradient teks senja */
+.text-sunset {
+  background: linear-gradient(100deg, #ffe9c9 0%, #ffc77a 32%, #ff9d7d 62%, #ff7597 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
